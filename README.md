@@ -1,17 +1,17 @@
 # TypeScript Architecture Lab
 
-Laboratorio de arquitectura con TypeScript: problemas reales, patrones de diseño,
-principios SOLID, sistemas distribuidos y confiabilidad. El objetivo no es memorizar
-diagramas, sino reconocer cuándo una presión de diseño justifica una abstracción.
+TypeScript architecture lab focused on real problems, design patterns, SOLID
+principles, distributed systems, and reliability. The goal is not to memorize
+diagrams, but to recognize when a design pressure justifies an abstraction.
 
-## Ruta de aprendizaje
+## Learning path
 
-1. Empezá por [`design-patterns/README.md`](design-patterns/README.md).
-2. Estudiá una familia de patrones.
-3. Ejecutá el laboratorio del dominio enlazado.
-4. Modificá una regla del negocio y observá qué diseño absorbe mejor el cambio.
+1. Start with [`design-patterns/README.md`](design-patterns/README.md).
+2. Study one pattern family.
+3. Run the linked domain lab.
+4. Change one business rule and observe which design absorbs the change better.
 
-## Comandos
+## Commands
 
 ```bash
 npm install
@@ -21,5 +21,5 @@ npm run lint
 npm run format:check
 ```
 
-Los ejemplos usan código y nombres profesionales en inglés. Las guías están escritas
-en español para concentrar el esfuerzo cognitivo en los conceptos.
+The examples use professional English code and naming. The guides are written in
+Spanish to keep the cognitive effort focused on the concepts.
