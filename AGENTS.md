@@ -4,6 +4,11 @@
 TypeScript Architecture Lab for design-pattern learning and domain-driven examples.
 
 ## Required constraints
+- Keep repository artifacts portable and free of personal environment information.
+- Do not write absolute machine paths, OS usernames, personal tool inventories,
+  global skill registries, credentials, or internal agent instructions into project artifacts.
+- Use repository-relative paths in project files. Keep local agent metadata outside
+  the repository; do not generate personal skill registries here.
 - Use strict TypeScript.
 - Prefer English for code, identifiers, comments, and tests.
 - Use Spanish for learning guides in `design-patterns/`.

@@ -20,7 +20,7 @@ S6. Give deeper treatment to Builder, Singleton, Adapter, and Strategy while sti
 ## Tasks
 
 - T1 (S1-S6) — inline — complete — toolchain, catalog guides, and learning conventions; commit: this work unit.
-- T2 (S2-S6) — inline — pending — implement the incident-response/SRE laboratory with tests and its linked guide material.
+- T2 (S2-S6) — inline — complete locally, uncommitted — incident-response/SRE domain, payment-outage demo, tests, and linked guide material.
 - T3 (S2-S6) — inline — pending — implement the data-pipeline laboratory with tests and its linked guide material.
 - T4 (S2-S6) — inline — pending — implement the commerce laboratory with tests and its linked guide material.
 - T5 (S2-S6) — inline — pending — implement the game-engine laboratory with tests and its linked guide material.
@@ -37,3 +37,15 @@ L3 (2026-11-07): Estimated delivery exceeds 400 authored lines. Default delivery
 L4 (2026-11-07): Delivery strategy selected by the user: `feature-branch-chain`. Each domain remains a reviewable work unit on the feature branch and can become a dependent PR slice.
 
 L5 (2026-11-07): T1 verified with `npm test` (1 test passed), `npm run typecheck`, `npm run lint`, and `npm run format:check`. Dependency installation initially exposed an npm Arborist peer-resolution failure; exact development dependency versions produced a reproducible install.
+
+L6 (2026-11-09): User requested incremental implementation starting with SRE.
+Scope ruling: implement T2 and an in-memory domain walkthrough first; defer HTTP,
+web UI, persistence, and T3-T6. No commits or remote operations authorized.
+The existing focused suite failed to load because incident-response.js was missing;
+after implementation, 9 SRE tests and 10 total tests passed. The demo printed P1,
+service-desk assignment, four lifecycle notices, and closed state. Initial lint
+identified four void-arrow expressions, corrected with block bodies. Whole-repository
+format checking found unrelated existing issues in AGENTS.md and the untracked
+.atl/skill-registry.md; those files were left untouched. Read-only independent
+review found no correctness issues. Risk: none (isolated simulated domain, additive
+demo command, no external effects or changes to shared runtime behavior).

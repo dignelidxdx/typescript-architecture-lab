@@ -153,6 +153,19 @@ más idiomáticos en TypeScript para estructuras pequeñas.
 
 ## Ejercicio de diagnóstico
 
+### Laboratorio ejecutable: incidentes/SRE
+
+Ejecutá `npm run demo:sre` para recorrer una caída de pagos desde la priorización
+hasta el cierre. El [módulo](../src/domains/incident-response/incident-response.ts)
+combina Strategy, Chain of Responsibility, Command, Observer y una máquina de
+estados pequeña. Los [tests](../src/domains/incident-response/incident-response.test.ts)
+verifican el flujo y rechazos; el [recorrido](../src/domains/incident-response/README.md)
+explica los costos y las alternativas simples.
+
+Es una simulación local: no reinicia servicios ni comprueba su recuperación real.
+El reinicio completado no se puede deshacer; el comando simulado no debe usarse
+como contrato operativo de producción.
+
 Diseñá una plataforma de incidentes que priorice por SLO, notifique a varios canales y
 permita transiciones controladas. Justificá por separado Strategy, Observer y State. Si
 una misma clase implementa los tres, identificá qué motivos de cambio quedaron mezclados.

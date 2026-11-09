@@ -13,6 +13,10 @@ diagrams, but to recognize when a design pressure justifies an abstraction.
 
 ## Commands
 
+The first runnable domain is [incident response/SRE](src/domains/incident-response/README.md).
+Run `npm run demo:sre` for an in-memory payment-outage walkthrough. The API and web
+interface are not implemented yet.
+
 ```bash
 npm install
 npm test

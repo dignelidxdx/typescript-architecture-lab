@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "demo:sre": "tsc --outDir dist && node dist/src/domains/incident-response/demo.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
