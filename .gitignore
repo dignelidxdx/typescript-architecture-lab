@@ -1,4 +1,7 @@
 # Logs
+# Local agent metadata must not be distributed with the project.
+.atl/
+
 logs
 *.log
 npm-debug.log*
