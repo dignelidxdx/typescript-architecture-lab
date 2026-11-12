@@ -1,117 +1,111 @@
-# Patrones de comportamiento
+# Behavioral Patterns
 
-Estos patrones distribuyen decisiones, mensajes, algoritmos y transiciones. Consideralos
-cuando los condicionales ya representan políticas independientes o cuando varios objetos
-necesitan coordinarse sin conocerse en detalle.
+These patterns distribute decisions, messages, algorithms, and transitions. Consider
+them when conditionals already represent independent policies or when several objects
+must coordinate without knowing each other's details.
 
-## Mapa rápido
+## Quick map
 
-| Patrón                  | Señal dominante                                     | Dominio      | Costo y alternativa simple                                                                  |
-| ----------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------- |
-| Chain of Responsibility | Varios handlers pueden resolver o escalar           | SRE          | El flujo cuesta rastrearlo; usá condicionales para una secuencia corta                      |
-| Command                 | Una acción necesita identidad, cola o reversión     | SRE          | Agrega objetos y ciclo de vida; llamá una función para acciones inmediatas                  |
-| Iterator                | El recorrido debe ocultar almacenamiento            | Datos        | Puede esconder I/O; devolvé un array para conjuntos pequeños                                |
-| Mediator                | Muchos componentes se conocen entre sí              | Operaciones  | Puede concentrar decisiones; conectá directamente a pocos colaboradores                     |
-| Memento                 | Se necesita restaurar estado sin exponer internals  | Videojuegos  | Copiar y versionar snapshots cuesta memoria; usá valores inmutables pequeños cuando alcance |
-| Observer                | Varios consumidores reaccionan a un evento          | SRE          | Orden y errores son implícitos; llamá directamente a colaboradores obligatorios             |
-| State                   | La conducta depende de una fase válida              | SRE          | Agrega tipos por fase; una unión discriminada basta con poca conducta                       |
-| Strategy                | Una política intercambiable decide cómo actuar      | SRE          | Fragmenta reglas simples; mantené un `switch` exhaustivo para variantes cerradas            |
-| Template Method         | El algoritmo conserva etapas                        | ETL          | Acopla por herencia; componé funciones si el orden no necesita protección                   |
-| Visitor                 | Se agregan operaciones sobre una estructura estable | Compiladores | Agregar nodos afecta todos los visitors; usá una unión discriminada en estructuras pequeñas |
+| Pattern                 | Dominant signal                                   | Domain     | Cost and simple alternative                                                           |
+| ----------------------- | ------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| Chain of Responsibility | Several handlers can resolve or escalate          | SRE        | The flow is harder to trace; use conditionals for a short sequence                    |
+| Command                 | An action needs identity, queuing, or reversal    | SRE        | Adds objects and lifecycle; call a function for immediate actions                     |
+| Iterator                | Traversal must hide storage                       | Data       | May hide I/O; return an array for small collections                                   |
+| Mediator                | Many components know about one another            | Operations | Can centralize too many decisions; connect a few collaborators directly               |
+| Memento                 | State must be restored without exposing internals | Games      | Copying and versioning snapshots costs memory; use small immutable values when enough |
+| Observer                | Several consumers react to an event               | SRE        | Ordering and errors are implicit; call required collaborators directly                |
+| State                   | Behavior depends on a valid phase                 | SRE        | Adds types per phase; a discriminated union is enough for small behavior              |
+| Strategy                | An interchangeable policy decides how to act      | SRE        | Fragments simple rules; keep an exhaustive `switch` for closed variants               |
+| Template Method         | The algorithm preserves stages                    | ETL        | Couples through inheritance; compose functions when order needs no protection         |
+| Visitor                 | Operations are added to a stable structure        | Compilers  | Adding nodes affects every visitor; use a discriminated union for small structures    |
 
 ## Chain of Responsibility
 
-**Problema.** Una solicitud puede ser atendida, enriquecida o escalada por varios
-handlers ordenados.
+**Problem.** A request can be handled, enriched, or escalated by several ordered handlers.
 
-**Caso real.** Un incidente pasa por runbook automático, equipo de servicio y guardia de
-plataforma hasta encontrar capacidad y autoridad suficientes.
+**Real case.** An incident moves through an automated runbook, service team, and platform
+on-call until sufficient capacity and authority are found.
 
-**Riesgo.** Una cadena opaca dificulta saber quién manejó el caso. Devolvé un resultado
-tipado y registrá la ruta. Middleware HTTP es una variante frecuente en TypeScript, Go y
-Java.
+**Risk.** An opaque chain makes it difficult to know who handled the case. Return a typed
+result and record the path. HTTP middleware is a common variant in TypeScript, Go, and Java.
 
 ## Command
 
-**Problema.** Una acción necesita convertirse en un valor: encolarse, auditarse,
-reintentarse o revertirse.
+**Problem.** An action must become a value so it can be queued, audited, retried, or
+reversed.
 
-**Caso real.** `RestartService` conserva parámetros, ejecuta la remediación y registra lo
-necesario para compensarla. En videojuegos, comandos representan input y habilitan replay.
+**Real case.** `RestartService` stores parameters, executes remediation, and records what
+is needed to compensate it. In games, commands represent input and enable replay.
 
-**No lo uses cuando:** una llamada directa es suficiente y no existe necesidad de ciclo
-de vida alrededor de la acción.
+**Do not use it when:** a direct call is sufficient and the action has no lifecycle needs.
 
 ## Iterator
 
-**Problema.** El consumidor necesita recorrer elementos sin conocer almacenamiento,
-paginación o carga diferida.
+**Problem.** The consumer needs to traverse elements without knowing about storage,
+pagination, or lazy loading.
 
-**TypeScript experto.** Implementá `Iterable<T>` para datos síncronos y
-`AsyncIterable<T>` para páginas o streams. Un async generator comunica backpressure mejor
-que devolver todo en un array.
+**Advanced TypeScript.** Implement `Iterable<T>` for synchronous data and `AsyncIterable<T>`
+for pages or streams. An async generator communicates backpressure better than returning
+everything in an array.
 
-**Caso real.** Un pipeline consume páginas de registros sin cargar millones de filas en
-memoria. Python usa iteradores extensamente; Go suele expresar el recorrido con canales o
-funciones iteradoras.
+**Real case.** A pipeline consumes record pages without loading millions of rows into
+memory. Python uses iterators extensively; Go often expresses traversal with channels or
+iterator functions.
 
 ## Mediator
 
-**Problema.** Muchos componentes se llaman mutuamente y cada cambio altera varios pares.
+**Problem.** Many components call one another, and each change affects several pairs.
 
-**Caso real.** Una sala de operaciones coordina timeline, chat, asignaciones y alertas a
-través de un mediador. Los participantes publican intenciones sin conocer a todos los
-receptores.
+**Real case.** An operations room coordinates a timeline, chat, assignments, and alerts
+through a mediator. Participants publish intentions without knowing every receiver.
 
-**Riesgo.** El mediador puede convertirse en un controlador gigante. Si solo hay dos
-colaboradores, una dependencia directa suele ser más honesta.
+**Risk.** The mediator can become a giant controller. With only two collaborators, a direct
+dependency is usually more honest.
 
 ## Memento
 
-**Problema.** Se debe capturar y restaurar estado sin permitir que el exterior manipule
-la representación interna.
+**Problem.** State must be captured and restored without allowing outside code to manipulate
+the internal representation.
 
-**Caso real.** Un juego guarda un snapshot versionado de la partida. Un editor implementa
-undo mediante snapshots pequeños o eventos inversos.
+**Real case.** A game stores a versioned snapshot of a match. An editor implements undo with
+small snapshots or inverse events.
 
-**Costo.** Copiar estados grandes consume memoria; persistir mementos introduce versionado
-y migraciones. Event sourcing no es simplemente Memento: conserva eventos del dominio,
-no copias opacas.
+**Cost.** Copying large states consumes memory; persisting mementos introduces versioning and
+migrations. Event sourcing is not simply Memento: it preserves domain events rather than
+opaque copies.
 
 ## Observer
 
-**Problema.** Varios consumidores reaccionan a un cambio y el emisor no debería conocer
-sus implementaciones.
+**Problem.** Several consumers react to a change, and the emitter should not know their
+implementations.
 
-**Caso real.** Cuando cambia un incidente, métricas, timeline y notificaciones reaccionan
-de manera independiente.
+**Real case.** When an incident changes, metrics, the timeline, and notifications react
+independently.
 
-**Riesgos.** Orden implícito, fugas por suscripciones y fallos parciales. Dentro de un
-proceso, callbacks tipados pueden bastar; entre servicios necesitás semánticas explícitas
-de entrega, idempotencia y reintentos.
+**Risks.** Implicit ordering, subscription leaks, and partial failures. Within one process,
+typed callbacks may be enough; across services, delivery semantics, idempotency, and retries
+must be explicit.
 
 ## State
 
-**Problema.** El comportamiento cambia según la fase y grandes condicionales permiten
-transiciones inválidas.
+**Problem.** Behavior changes by phase, and large conditionals allow invalid transitions.
 
-**Caso real.** Un incidente puede estar `detected`, `acknowledged`, `mitigating` o
-`resolved`; resolver antes de reconocerlo puede violar la política operativa.
+**Real case.** An incident may be `detected`, `acknowledged`, `mitigating`, or `resolved`;
+resolving it before acknowledgment may violate operational policy.
 
-Usá una unión discriminada cuando los estados solo contienen datos y un conjunto pequeño
-de funciones. Usá objetos State cuando cada fase acumula comportamiento propio y crece
-independientemente.
+Use a discriminated union when states only contain data and a small set of functions. Use
+State objects when each phase accumulates its own behavior and grows independently.
 
-## Strategy: profundidad
+## Strategy: deeper dive
 
-**Problema.** Una decisión posee algoritmos alternativos con el mismo propósito y debe
-cambiar sin modificar al consumidor.
+**Problem.** A decision has alternative algorithms with the same purpose and must change
+without modifying its consumer.
 
-**Detectalo cuando:** un `switch` elige políticas; aparecen flags que alteran el algoritmo;
-los clientes requieren reglas diferentes; querés probar políticas de forma aislada.
+**Recognize it when:** a `switch` selects policies; flags alter the algorithm; clients need
+different rules; policies must be tested in isolation.
 
-**Caso real.** La prioridad de incidentes puede calcularse por impacto, objetivos SLO o
-regulación. El coordinador recibe una función o interfaz `PrioritizationStrategy`.
+**Real case.** Incident priority may be calculated by impact, SLO objectives, or regulation.
+The coordinator receives a function or `PrioritizationStrategy` interface.
 
 ```ts
 type PrioritizationStrategy = (incident: Incident) => Priority;
@@ -121,51 +115,51 @@ const coordinator = new IncidentCoordinator({
 });
 ```
 
-TypeScript permite Strategy con funciones, objetos callable o clases. Elegí una clase
-solo si la política necesita estado y ciclo de vida. En Python es natural usar callables;
-en Go, interfaces pequeñas o funciones.
+TypeScript supports Strategy through functions, callable objects, or classes. Choose a class
+only when the policy needs state and a lifecycle. In Python, callables are natural; in Go,
+small interfaces or functions are common.
 
-**No lo uses cuando:** las variantes son casos de dominio cerrados y una unión
-discriminada con `switch` exhaustivo resulta más transparente.
+**Do not use it when:** variants are closed domain cases and an exhaustive discriminated
+union with `switch` is more transparent.
 
 ## Template Method
 
-**Problema.** Un algoritmo mantiene un orden invariable, pero algunas etapas cambian.
+**Problem.** An algorithm preserves an invariant order while some stages vary.
 
-**Caso real.** Todo proceso ETL valida, extrae, transforma, persiste y emite métricas; las
-fuentes personalizan pasos limitados.
+**Real case.** Every ETL process validates, extracts, transforms, persists, and emits
+metrics; sources customize limited steps.
 
-**Trade-off.** Se basa tradicionalmente en herencia. En TypeScript, componer funciones
-en un pipeline suele dar menor acoplamiento. Usalo cuando el esqueleto debe imponer el
-orden y los hooks están deliberadamente restringidos.
+**Trade-off.** It traditionally relies on inheritance. In TypeScript, composing functions
+in a pipeline usually creates less coupling. Use it when the skeleton must enforce order
+and hooks are deliberately restricted.
 
 ## Visitor
 
-**Problema.** La estructura de objetos es estable, pero se agregan muchas operaciones que
-no pertenecen naturalmente a sus nodos.
+**Problem.** The object structure is stable, but many operations do not naturally belong to
+its nodes.
 
-**Caso real.** Un AST recibe validadores, generadores de código y analizadores. Un modelo
-contable estable recibe exportadores y auditores.
+**Real case.** An AST receives validators, code generators, and analyzers. A stable accounting
+model receives exporters and auditors.
 
-**Costo.** Agregar una operación es fácil; agregar un nuevo tipo de nodo obliga a cambiar
-todos los visitors. Las uniones discriminadas y pattern matching exhaustivo suelen ser
-más idiomáticos en TypeScript para estructuras pequeñas.
+**Cost.** Adding an operation is easy; adding a new node type requires changing every
+visitor. Discriminated unions and exhaustive pattern matching are often more idiomatic in
+TypeScript for small structures.
 
-## Ejercicio de diagnóstico
+## Diagnostic exercise
 
-### Laboratorio ejecutable: incidentes/SRE
+### Executable laboratory: incident response/SRE
 
-Ejecutá `npm run demo:sre` para recorrer una caída de pagos desde la priorización
-hasta el cierre. El [módulo](../src/domains/incident-response/incident-response.ts)
-combina Strategy, Chain of Responsibility, Command, Observer y una máquina de
-estados pequeña. Los [tests](../src/domains/incident-response/incident-response.test.ts)
-verifican el flujo y rechazos; el [recorrido](../src/domains/incident-response/README.md)
-explica los costos y las alternativas simples.
+Run `npm run demo:sre` to follow a payment outage from prioritization to closure. The
+[module](../src/domains/incident-response/incident-response.ts) combines Strategy, Chain
+of Responsibility, Command, Observer, and a small state machine. The
+[tests](../src/domains/incident-response/incident-response.test.ts) verify the flow and
+rejections; the [walkthrough](../src/domains/incident-response/README.md) explains the
+costs and simpler alternatives.
 
-Es una simulación local: no reinicia servicios ni comprueba su recuperación real.
-El reinicio completado no se puede deshacer; el comando simulado no debe usarse
-como contrato operativo de producción.
+This is a local simulation: it does not restart services or verify real recovery. A
+completed restart cannot be undone; the simulated command must not be used as a production
+operational contract.
 
-Diseñá una plataforma de incidentes que priorice por SLO, notifique a varios canales y
-permita transiciones controladas. Justificá por separado Strategy, Observer y State. Si
-una misma clase implementa los tres, identificá qué motivos de cambio quedaron mezclados.
+Design an incident platform that prioritizes by SLO, notifies several channels, and allows
+controlled transitions. Justify Strategy, Observer, and State separately. If one class
+implements all three, identify which reasons for change have become mixed together.

@@ -31,7 +31,6 @@ Build a practical laboratory for learning TypeScript and design-pattern recognit
 - TypeScript runs in strict mode.
 - Vitest exercises behavior through public interfaces.
 - Domain terminology and code artifacts use professional English.
-- Spanish learning guides may explain the concepts, but identifiers and source comments remain English.
 - Each implemented pattern must state the pressure that justifies its added indirection.
 
 ## Chosen approach

@@ -1,109 +1,107 @@
-# Patrones estructurales
+# Structural Patterns
 
-Esta familia aparece cuando las piezas ya existen, pero su forma de colaborar genera
-acoplamiento, incompatibilidad, duplicación o costos operativos.
+This family appears when the pieces already exist, but the way they collaborate creates
+coupling, incompatibility, duplication, or operational cost.
 
-## Mapa rápido
+## Quick map
 
-| Patrón    | Pregunta de diagnóstico                             | Dominio     | Costo y alternativa simple                                                                            |
-| --------- | --------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------- |
-| Adapter   | ¿La capacidad sirve, pero su interfaz no coincide?  | Datos       | Mantiene otra traducción; usá el SDK directamente con un consumidor estable                           |
-| Bridge    | ¿Dos dimensiones cambian independientemente?        | Alertas     | Multiplica colaboraciones; Strategy basta cuando solo varía un eje                                    |
-| Composite | ¿Necesito tratar hojas y grupos igual?              | Videojuegos | El contrato común puede ocultar operaciones inválidas; recorré una estructura simple sin polimorfismo |
-| Decorator | ¿Necesito combinar capacidades por instancia?       | Precios     | El orden cambia resultados; componé funciones si no necesitás identidad                               |
-| Facade    | ¿El cliente conoce demasiados pasos internos?       | Checkout    | Puede convertirse en God Object; una función de caso de uso basta para una orquestación pequeña       |
-| Flyweight | ¿Miles de objetos repiten datos inmutables?         | Videojuegos | Compartir identidad complica mutaciones; no lo uses sin medir memoria                                 |
-| Proxy     | ¿Necesito controlar acceso sin cambiar el contrato? | Pagos       | Puede ocultar latencia y fallos; hacé explícito el servicio remoto si domina el contrato              |
+| Pattern   | Diagnostic question                                         | Domain   | Cost and simple alternative                                                                     |
+| --------- | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| Adapter   | Does the capability work, but its interface does not match? | Data     | Maintains another translation; use the SDK directly behind a stable consumer                    |
+| Bridge    | Do two dimensions change independently?                     | Alerts   | Multiplies collaborations; Strategy is enough when only one axis varies                         |
+| Composite | Do I need to treat leaves and groups alike?                 | Games    | A common contract can hide invalid operations; traverse a simple structure without polymorphism |
+| Decorator | Do I need to combine capabilities per instance?             | Pricing  | Order changes results; compose functions when identity is unnecessary                           |
+| Facade    | Does the client know too many internal steps?               | Checkout | Can become a God Object; a use-case function is enough for small orchestration                  |
+| Flyweight | Do thousands of objects repeat immutable data?              | Games    | Shared identity complicates mutation; measure memory before using it                            |
+| Proxy     | Do I need to control access without changing the contract?  | Payments | Can hide latency and failures; make a remote service explicit when it dominates the contract    |
 
-## Adapter: profundidad
+## Adapter: deeper dive
 
-**Problema.** Un componente externo ofrece la capacidad correcta con nombres, tipos o
-semántica incompatibles con el dominio.
+**Problem.** An external component provides the right capability with names, types, or
+semantics that do not match the domain.
 
-**Detectalo cuando:** el modelo de un proveedor invade casos de uso; cada consumidor
-normaliza fechas o errores; cambiar de SDK obliga a editar el núcleo.
+**Recognize it when:** a provider model leaks into use cases; every consumer normalizes
+dates or errors; changing the SDK requires editing the core.
 
-**Caso real.** Tres proveedores entregan clientes como CSV, JSON y objetos de SDK. Cada
-adapter traduce al `CustomerRecord` canónico y convierte errores técnicos a fallos del
-dominio. La traducción pertenece al borde, no al modelo central.
+**Real case.** Three providers deliver customers as CSV, JSON, and SDK objects. Each
+adapter translates them into the canonical `CustomerRecord` and converts technical errors
+into domain failures. Translation belongs at the boundary, not in the central model.
 
-**TypeScript experto.** Usá `unknown` para la entrada externa y validá antes de adaptar.
-Un `as CustomerRecord` no adapta: silencia al compilador. Librerías como Zod son útiles
-si la validación de datos es parte central del ejercicio; no son necesarias para enseñar
-la colaboración básica.
+**Advanced TypeScript.** Use `unknown` for external input and validate before adapting.
+`as CustomerRecord` does not adapt; it silences the compiler. Libraries such as Zod are
+useful when data validation is central to the exercise, but are not required to teach the
+basic collaboration.
 
 ## Bridge
 
-**Problema.** Dos ejes cambian de forma independiente y combinarlos mediante herencia
-produce una clase por cada combinación.
+**Problem.** Two axes change independently, and inheritance would produce one class for
+each combination.
 
-**Caso real.** Alertas con severidad y formato propios deben enviarse por email, Slack o
-PagerDuty. Separar `AlertMessage` de `DeliveryChannel` evita clases como
-`CriticalSlackAlert` y `WarningEmailAlert`.
+**Real case.** Alerts with their own severity and format must be sent by email, Slack, or
+PagerDuty. Separating `AlertMessage` from `DeliveryChannel` avoids classes such as
+`CriticalSlackAlert` and `WarningEmailAlert`.
 
-**No lo uses cuando:** una dimensión es fija o Strategy simple cubre la única variación.
+**Do not use it when:** one dimension is fixed or simple Strategy covers the only variation.
 
 ## Composite
 
-**Problema.** Hojas y grupos deben responder a la misma operación recursiva.
+**Problem.** Leaves and groups must support the same recursive operation.
 
-**Caso real.** Un motor de videojuegos actualiza y renderiza entidades individuales y
-grupos de escena mediante el mismo contrato. También aparece en catálogos, permisos y
-estructuras organizacionales.
+**Real case.** A game engine updates and renders individual entities and scene groups
+through the same contract. The pattern also appears in catalogs, permissions, and
+organizational structures.
 
-**Costo.** El contrato común puede volverse demasiado genérico. No todas las operaciones
-tienen sentido para hojas y contenedores.
+**Cost.** The common contract can become too generic. Not every operation makes sense for
+both leaves and containers.
 
 ## Decorator
 
-**Problema.** Las capacidades se combinan dinámicamente y la herencia produciría una
-subclase por combinación.
+**Problem.** Capabilities are combined dynamically, and inheritance would produce one
+subclass per combination.
 
-**Caso real.** El precio base de un carrito recibe descuento de membresía, impuesto y
-promoción temporal. Cada decorador conserva el contrato de cálculo y envuelve al
-anterior.
+**Real case.** A cart's base price receives a membership discount, tax, and temporary
+promotion. Each decorator preserves the calculation contract and wraps the previous one.
 
-**Diferencia clave.** Decorator agrega comportamiento; Adapter cambia la interfaz; Proxy
-controla el acceso. En TypeScript, funciones de orden superior suelen ser una versión
-más simple del mismo principio.
+**Key distinction.** Decorator adds behavior; Adapter changes the interface; Proxy controls
+access. In TypeScript, higher-order functions are often a simpler version of the same idea.
 
 ## Facade
 
-**Problema.** Un caso de uso obliga al cliente a conocer orden, dependencias y detalles
-de varios subsistemas.
+**Problem.** A use case forces the client to know the order, dependencies, and details of
+several subsystems.
 
-**Caso real.** `CheckoutFacade.placeOrder()` coordina inventario, impuestos, pago y
-facturación. No contiene todas las reglas: ofrece un límite estable y explícito.
+**Real case.** `CheckoutFacade.placeOrder()` coordinates inventory, taxes, payment, and
+invoicing. It does not contain every rule; it provides a stable, explicit boundary.
 
-**Riesgo.** Una facade que absorbe toda la lógica se convierte en God Object. Debe
-orquestar capacidades, no reemplazar sus modelos.
+**Risk.** A facade that absorbs all logic becomes a God Object. It should orchestrate
+capabilities, not replace their models.
 
 ## Flyweight
 
-**Problema.** Una enorme cantidad de objetos repite datos inmutables y consume memoria.
+**Problem.** A very large number of objects repeats immutable data and consumes memory.
 
-**Caso real.** Miles de entidades comparten textura, geometría y animación; cada instancia
-conserva solo posición, velocidad y salud. Medí antes de aplicarlo: compartir estado hace
-la mutabilidad mucho más peligrosa.
+**Real case.** Thousands of entities share texture, geometry, and animation; each instance
+keeps only position, velocity, and health. Measure before applying it: shared state makes
+mutation much more dangerous.
 
-En análisis de datos aparece mediante diccionarios, interning y representaciones
-categóricas. En Go puede reducir asignaciones; en JavaScript el garbage collector y los
-objetos ocultos requieren profiling, no intuición.
+In data analysis, this appears through dictionaries, interning, and categorical
+representations. In Go it can reduce allocations; in JavaScript, the garbage collector
+and hidden objects require profiling rather than intuition.
 
 ## Proxy
 
-**Problema.** El acceso a un objeto necesita autorización, carga diferida, caché,
-telemetría o comunicación remota sin modificar el contrato del consumidor.
+**Problem.** Access to an object needs authorization, lazy loading, caching, telemetry, or
+remote communication without changing the consumer's contract.
 
-**Caso real.** Un `PaymentGatewayProxy` verifica permisos e idempotencia antes de delegar
-al gateway real. Un ORM puede devolver proxies lazy; un service mesh funciona como proxy
-de red, pero no es automáticamente el patrón orientado a objetos dentro del código.
+**Real case.** A `PaymentGatewayProxy` checks permissions and idempotency before delegating
+to the real gateway. An ORM may return lazy proxies; a service mesh acts as a network proxy,
+but it is not automatically the object-oriented pattern in application code.
 
-**Riesgo.** Ocultar latencia o fallos de red detrás de una interfaz aparentemente local
-engaña al consumidor. El contrato debe expresar asincronía y errores.
+**Risk.** Hiding network latency or failures behind an apparently local interface misleads
+the consumer. The contract must express asynchrony and errors.
 
-## Ejercicio de diagnóstico
+## Diagnostic exercise
 
-Un sistema consume dos APIs meteorológicas, agrega caché y expone un resumen sencillo.
-Separá qué parte es Adapter, cuál podría ser Proxy y cuál constituye Facade. Explicá por
-qué una sola clase que haga las tres cosas dificulta probar y reemplazar responsabilidades.
+A system consumes two weather APIs, adds caching, and exposes a simple summary. Separate
+which part is an Adapter, which could be a Proxy, and which constitutes a Facade. Explain
+why one class performing all three responsibilities makes testing and replacement harder.

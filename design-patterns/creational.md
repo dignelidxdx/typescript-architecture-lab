@@ -1,61 +1,61 @@
-# Patrones creacionales
+# Creational Patterns
 
-Pensá en esta familia cuando construir un objeto válido requiere decisiones, etapas,
-compatibilidad entre componentes o control explícito de identidad. Si `new` sigue
-siendo claro y seguro, mantenelo: una fábrica innecesaria solo oculta el constructor.
+Consider this family when building a valid object requires decisions, stages,
+compatibility between components, or explicit identity control. If `new` remains clear
+and safe, keep it: an unnecessary factory only hides the constructor.
 
-## Mapa rápido
+## Quick map
 
-| Patrón           | Señal dominante                                         | Dominio     | Costo y alternativa simple                                                                        |
-| ---------------- | ------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
-| Factory Method   | El formato decide qué implementación crear              | Ingesta     | Agrega indirección; usá una función o constructor si la selección es estable                      |
-| Abstract Factory | Varias dependencias deben pertenecer a la misma familia | Checkout    | Agregar productos afecta todas las familias; ensamblá explícitamente si no hay incompatibilidades |
-| Builder          | La construcción tiene etapas, opciones e invariantes    | Pipeline    | Duplica parte del modelo; preferí un objeto literal validado para configuraciones pequeñas        |
-| Prototype        | Crear desde cero es caro y existe una plantilla válida  | Videojuegos | Copias profundas y compartidas son difíciles; construí desde datos si crear es barato             |
-| Singleton        | Debe existir una identidad única y controlada           | Recursos    | Oculta dependencias; preferí crear e inyectar la instancia desde el composition root              |
+| Pattern          | Dominant signal                                                | Domain    | Cost and simple alternative                                                                   |
+| ---------------- | -------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
+| Factory Method   | The format determines which implementation to create           | Ingestion | Adds indirection; use a function or constructor when selection is stable                      |
+| Abstract Factory | Several dependencies must belong to the same family            | Checkout  | Adding products affects every family; assemble explicitly when there are no incompatibilities |
+| Builder          | Construction has stages, options, and invariants               | Pipeline  | Duplicates part of the model; prefer a validated object literal for small configurations      |
+| Prototype        | Creating from scratch is expensive and a valid template exists | Games     | Deep and shared copies are difficult; build from data when creation is cheap                  |
+| Singleton        | One controlled identity must exist                             | Resources | Hides dependencies; create and inject the instance from the composition root                  |
 
 ## Factory Method
 
-**Problema.** Un sistema sabe cuándo necesita un conector, pero el formato o proveedor
-determina cuál clase concreta debe construir.
+**Problem.** A system knows when it needs a connector, but the format or provider
+determines which concrete class to build.
 
-**Detectalo cuando:** aparecen `switch` repetidos sobre el tipo de fuente; cada nueva
-fuente modifica el orquestador; la creación necesita validación propia.
+**Recognize it when:** repeated `switch` statements select source types; every new source
+modifies the orchestrator; creation requires its own validation.
 
-**Caso real.** Una plataforma de datos selecciona lectores CSV, JSON Lines o eventos
-Kafka a partir de una especificación. En Java es común mediante subclases; en Go y
-TypeScript suele bastar una función fábrica tipada.
+**Real case.** A data platform selects CSV, JSON Lines, or Kafka event readers from a
+specification. Java commonly uses subclasses; Go and TypeScript often only need a typed
+factory function.
 
-**No lo uses cuando:** solo existen dos constructores estables y una función explícita
-es más clara. El patrón no exige herencia.
+**Do not use it when:** only two stable constructors exist and an explicit function is
+clearer. The pattern does not require inheritance.
 
 ## Abstract Factory
 
-**Problema.** Los objetos creados por separado pueden ser válidos individualmente pero
-incompatibles como conjunto.
+**Problem.** Objects created separately may be valid individually but incompatible as a
+set.
 
-**Detectalo cuando:** aparecen pares prohibidos; una región o tenant selecciona toda una
-familia; los tests repiten ensamblajes compatibles.
+**Recognize it when:** forbidden pairs appear; a region or tenant selects an entire
+family; tests repeat compatible assemblies.
 
-**Caso real.** Un checkout para Argentina necesita calculador impositivo, proveedor de
-factura y medio de pago compatibles con esa jurisdicción. Crear cada dependencia con
-un `switch` independiente permite combinaciones ilegales.
+**Real case.** An Argentina checkout needs a tax calculator, invoice provider, and
+payment method compatible with that jurisdiction. Creating each dependency with an
+independent `switch` permits illegal combinations.
 
-**Costo.** Agregar una familia es fácil; agregar un nuevo tipo de producto obliga a
-actualizar todas las familias. Es una decisión importante en Java y C#; TypeScript puede
-expresar la compatibilidad con interfaces y tipos discriminados.
+**Cost.** Adding a family is easy; adding a new product type requires updating every
+family. This is an important decision in Java and C#; TypeScript can express compatibility
+with interfaces and discriminated types.
 
-## Builder: profundidad
+## Builder: deeper dive
 
-**Problema.** Un objeto posee muchas opciones, pero no todas las secuencias producen un
-estado válido. Un constructor largo no comunica etapas ni dependencias entre campos.
+**Problem.** An object has many options, but not every sequence produces valid state. A
+long constructor does not communicate stages or dependencies between fields.
 
-**Detectalo cuando:** hay parámetros booleanos, configuración parcial, validaciones
-dispersas o necesidad de construir variantes legibles en tests.
+**Recognize it when:** there are boolean parameters, partial configuration, scattered
+validation, or a need to build readable variants in tests.
 
-**Caso real.** Un pipeline requiere fuente y destino; permite filtros y transformación;
-el procesamiento incremental exige checkpoint storage. `build()` es el límite donde se
-rechaza una configuración incompleta.
+**Real case.** A pipeline requires a source and destination, allows filters and
+transformation, and needs checkpoint storage for incremental processing. `build()` is the
+boundary that rejects incomplete configuration.
 
 ```ts
 const pipeline = PipelineBuilder.from(source)
@@ -66,48 +66,46 @@ const pipeline = PipelineBuilder.from(source)
   .build();
 ```
 
-**TypeScript experto.** Un builder puede usar tipos de estado genéricos para impedir
-`build()` antes de configurar campos obligatorios. Usalo cuando el error merece
-prevención en compilación; si el modelo dinámico proviene de JSON, igualmente necesitás
-validación en runtime.
+**Advanced TypeScript.** A builder can use generic state types to prevent calling `build()`
+before required fields are configured. Use this when compile-time prevention is worth the
+complexity; if the model comes dynamically from JSON, you still need runtime validation.
 
-**No lo uses cuando:** el objeto tiene tres campos independientes o un objeto literal
-con `satisfies` comunica mejor la intención.
+**Do not use it when:** the object has three independent fields or an object literal with
+`satisfies` communicates intent better.
 
 ## Prototype
 
-**Problema.** La creación completa es costosa o compleja, pero existe una instancia base
-segura para derivar variantes.
+**Problem.** Complete creation is expensive or complex, but a safe base instance exists
+from which variants can be derived.
 
-**Caso real.** Un juego clona la plantilla de un enemigo y reemplaza posición y salud.
-Los datos inmutables de animación pueden compartirse; el inventario mutable debe
-copiarse. Ese límite es el verdadero aprendizaje: una copia superficial puede compartir
-estado accidentalmente.
+**Real case.** A game clones an enemy template and replaces its position and health.
+Immutable animation data can be shared; mutable inventory must be copied. That boundary is
+the real lesson: a shallow copy can accidentally share state.
 
-**Otros usos.** Plantillas de documentos, configuraciones de simulación y escenarios de
-prueba. JavaScript ofrece spread y `structuredClone`, pero copiar datos no equivale a
-preservar invariantes de dominio.
+**Other uses.** Document templates, simulation configurations, and test scenarios.
+JavaScript provides spread and `structuredClone`, but copying data is not the same as
+preserving domain invariants.
 
-## Singleton: profundidad
+## Singleton: deeper dive
 
-**Problema legítimo.** Un recurso posee una única identidad por proceso y crear una
-segunda instancia rompería una garantía: coordinador de migraciones, lock registry o
-acceso a un dispositivo exclusivo.
+**Legitimate problem.** A resource has one identity per process, and creating a second
+instance would break a guarantee: a migration coordinator, lock registry, or exclusive
+device access.
 
-**No es justificación:** “quiero acceder desde cualquier parte”. Eso describe estado
-global, no unicidad de negocio.
+**Not a justification:** “I want to access it from anywhere.” That describes global state,
+not business uniqueness.
 
-**Riesgos:** dependencias ocultas, orden de inicialización, tests acoplados, estado que
-sobrevive entre casos y dificultad para ejecutar workers aislados.
+**Risks:** hidden dependencies, initialization order, coupled tests, state that survives
+between cases, and difficulty running isolated workers.
 
-En TypeScript preferí crear la instancia en el composition root e inyectarla. Un módulo
-ES ya se evalúa una vez por loader, pero esa mecánica cambia con workers, procesos y
-bundlers. Si la unicidad debe cruzar procesos, un Singleton no sirve: necesitás una
-coordinación externa como base de datos, lease o lock distribuido.
+In TypeScript, prefer creating the instance in the composition root and injecting it. An
+ES module is evaluated once per loader, but that behavior changes with workers, processes,
+and bundlers. If uniqueness must cross processes, a Singleton is insufficient: you need
+external coordination such as a database, lease, or distributed lock.
 
-## Ejercicio de diagnóstico
+## Diagnostic exercise
 
-Diseñá la configuración de un exportador de datos con origen obligatorio, formatos
-opcionales y credenciales por destino. Primero resolvelo con un objeto literal. Introducí
-Builder únicamente cuando puedas señalar una combinación inválida que el diseño simple
-no previene con claridad.
+Design the configuration of a data exporter with a required source, optional formats, and
+destination-specific credentials. First solve it with an object literal. Introduce Builder
+only when you can identify an invalid combination that the simple design does not prevent
+clearly.

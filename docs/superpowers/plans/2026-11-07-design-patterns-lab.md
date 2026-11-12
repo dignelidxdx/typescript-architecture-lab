@@ -14,7 +14,7 @@
 
 - Enable strict TypeScript compiler checks.
 - Use professional English for code, identifiers, source comments, and tests.
-- Use Spanish for the three requested learning guides.
+- Use professional English for the three learning guides.
 - Add dependencies only when they provide test, compiler, or formatting infrastructure.
 - Observe RED before production implementation for every runnable behavior.
 - Implement only patterns justified by a documented domain pressure.
